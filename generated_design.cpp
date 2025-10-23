@@ -1,5 +1,5 @@
 // Auto-generated design from Architecture
-// Architecture: Block(relu, {'filter': 64}) -> Block(5x5_conv, {'filter': 32}) -> Block(5x5_conv, {'filter': 128}) -> Block(5x5_conv, {'filter': 128})
+// Architecture: Block(5x5_conv, {'filter': 32}) -> Block(relu, {'filter': 32}) -> Block(3x3_conv, {'filter': 32}) -> Block(add, {'filter': 128})
 #include <cstddef>
 
 // Placeholder function declarations
@@ -14,12 +14,12 @@ void top_function(float* input, float* output, int size) {
     #pragma HLS INTERFACE s_axilite port=return
 
     // Architecture implementation
-    // Block 0: relu
-    relu(output, size);
-    // Block 1: 5x5_conv with 32 filters
+    // Block 0: 5x5_conv with 32 filters
     conv(input, output, 32, 5);
-    // Block 2: 5x5_conv with 128 filters
-    conv(input, output, 128, 5);
-    // Block 3: 5x5_conv with 128 filters
-    conv(input, output, 128, 5);
+    // Block 1: relu
+    relu(output, size);
+    // Block 2: 3x3_conv with 32 filters
+    conv(input, output, 32, 3);
+    // Block 3: add
+    add(input, output, output, size);
 }

@@ -2,15 +2,14 @@ import subprocess # runs shell commands
 import os # file operations
 from search_space import get_random_architecture
 from predictor import featurize
-from parse_report import parse_timing_report
+
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
-from generate_cpp import generate_cpp_from_architecture  # NEW IMPORT
+from generate_cpp import generate_cpp_from_architecture
 
 # config
 NUM_DATAPOINTS_TO_GATHER = 1 # maybe 100? For demo, keep it small
 VIVADO_SCRIPT = "./run_synthesis.sh" # Vivado setup script
-REPORT_FILE_PATH = "./build/timing_report.txt"
 
 # database for real data
 real_data_X = [] # feature vectors
@@ -43,7 +42,7 @@ for i in range(NUM_DATAPOINTS_TO_GATHER):
     arch = get_random_architecture()
     features = featurize(arch)
     
-    # 2. GENERATE C++ CODE FROM ARCHITECTURE (NEW!)
+    # 2. generate c++ code from architecture
     print(f"Architecture: {arch}")
     print(f"Features: {features}")
     print("Generating C++ code from architecture...")
@@ -57,7 +56,7 @@ for i in range(NUM_DATAPOINTS_TO_GATHER):
     if os.path.exists("build/"): subprocess.run(["rm", "-rf", "build/"])
     
     # start HLS + Vivado synthesis using shell script
-    # catch errors if synthesis fails
+    # catch errors if synthesis fails, and skip data point
     try:
         subprocess.run(["bash", VIVADO_SCRIPT], check=True)
     except subprocess.CalledProcessError as e:
@@ -68,7 +67,7 @@ for i in range(NUM_DATAPOINTS_TO_GATHER):
     
     print("Synthesis finished.")
     
-    # 4. read timing report and extract WNS using parser
+    # 4. read timing report and extract WNS using parser function, TODO change to real parser, change build directory
     print("reading timing report.")
     wns = read_wns_from_file('./build/wns.txt')
 
