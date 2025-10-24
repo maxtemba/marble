@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
-from search_space import Architecture, get_random_architecture
+from .search_space import Architecture, get_random_architecture
 
 # architecture to vector featurization translation
 def featurize(arch: Architecture):
