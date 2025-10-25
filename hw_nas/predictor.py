@@ -16,6 +16,8 @@ def featurize(arch: Architecture):
     max_linear_out_features = 0
     total_padding_same = 0
     total_padding_num = 0
+    total_stride_1 = 0
+    total_stride_2 = 0
     
     for block in arch.blocks:
         op_type = block.op_type
@@ -24,14 +26,25 @@ def featurize(arch: Architecture):
         if op_type == 'conv':
             total_convs += 1
             max_conv_out_channels = max(max_conv_out_channels, params.get('out_channels', 0))
+            
+            # Featurize padding
             if params.get('padding') == 'same':
                 total_padding_same += 1
             elif isinstance(params.get('padding'), int):
                 total_padding_num += params.get('padding')
+                
+            # Featurize stride
+            if params.get('stride') == 1:
+                total_stride_1 += 1
+            elif params.get('stride') == 2:
+                total_stride_2 += 1
+                
         elif op_type == 'relu':
             total_relu += 1
         elif op_type == 'max_pool':
             total_max_pool += 1
+            # All our max_pool ops have stride 2
+            total_stride_2 += 1
         elif op_type == 'global_avg_pool':
             total_avg_pool += 1
         elif op_type == 'linear':
@@ -50,5 +63,7 @@ def featurize(arch: Architecture):
         total_linear,
         max_linear_out_features,
         total_padding_same,
-        total_padding_num
+        total_padding_num,
+        total_stride_1,
+        total_stride_2
     ])
