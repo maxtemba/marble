@@ -4,37 +4,29 @@ import subprocess
 import numpy as np
 import joblib
 
-# --- FIX: Add project root to Python path ---
-# This allows imports from the 'hw_nas' package
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(PROJECT_ROOT)
-# --- End of FIX ---
 
-# --- Import from our new hw_nas package ---
 from hw_nas.search_space import get_random_architecture
 from hw_nas.predictor import featurize
 from hw_nas.cpp_generator import generate_cpp_from_architecture
 from hw_nas.data_collector import collect_single_datapoint
 from hw_nas.predictor_trainer import train_predictors, test_trained_predictors
 
-# --- config ---
-# All paths are now relative to the project root
+# config
 NUM_DATAPOINTS_TO_GATHER = 1 # maybe 100? for demo, keep it small
 VIVADO_SCRIPT = "hls_vivado/run_synthesis.sh" # Vivado setup script
 TIMING_PREDICTOR_PATH = "data/saved_models/timing_predictor.joblib" # saved time predictor path
 POWER_PREDICTOR_PATH = "data/saved_models/power_predictor.joblib" # saved power predictor path
 
-# We create a config dictionary to pass all paths to helper functions
 CONFIG = {
     "VIVADO_SCRIPT": VIVADO_SCRIPT,
     "GENERATED_CPP_FILE": "hls_vivado/src/generated_design.cpp",
     "BUILD_DIR": "build",
-    # --- MODIFIED: All build artifacts are now INSIDE build/ ---
     "RESULTS_FILE": "build/results.txt",
-    "VIVADO_LOG": "build/vivado.log",         # Log will be inside build
-    "VIVADO_JOU": "build/vivado.jou",         # Journal will be inside build
-    "HLS_OUTPUT_DIR": "build/top_function" # HLS output will be inside build
-    # --- END MODIFICATION ---
+    "VIVADO_LOG": "build/vivado.log",         
+    "VIVADO_JOU": "build/vivado.jou",         
+    "HLS_OUTPUT_DIR": "build/top_function" 
 }
 
 def main():
@@ -47,14 +39,13 @@ def main():
     print(f"start data collection for {NUM_DATAPOINTS_TO_GATHER} architectures")
 
     for i in range(NUM_DATAPOINTS_TO_GATHER):
-        # Pass the config and data lists to the collector function
+        # pass the config and data lists to the collector function
         features, wns, power = collect_single_datapoint(
             i + 1, 
             NUM_DATAPOINTS_TO_GATHER, 
             CONFIG
         )
         
-        # The main loop is now responsible for appending data
         if features is not None and wns is not None and power is not None:
             # for valid data point save features + wns + power
             print(f"SUCCESS: Real WNS: {wns:.2f} ns, Real Power: {power:.4f} W")
@@ -81,7 +72,6 @@ def main():
     test_trained_predictors(timing_predictor, power_predictor)
 
 if __name__ == "__main__":
-    # Create directories for data if they don't exist
     os.makedirs(os.path.dirname(TIMING_PREDICTOR_PATH), exist_ok=True)
     main()
 

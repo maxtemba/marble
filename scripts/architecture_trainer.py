@@ -9,37 +9,29 @@ import torchvision.transforms as transforms
 import joblib
 import numpy as np
 
-# --- FIX: Add project root to Python path ---
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(PROJECT_ROOT)
-# --- End of FIX ---
 
-# --- Imports from your project ---
-try:
-    from hw_nas.search_space import get_random_architecture, build_pytorch_model
-    from hw_nas.predictor import featurize
-except ImportError as e:
-    print(f"ERROR: Failed to import hw_nas modules. {e}")
-    sys.exit(1)
+from hw_nas.search_space import get_random_architecture, build_pytorch_model
+from hw_nas.predictor import featurize
 
-# --- Configuration ---
-# Trained predictor paths (from run_data_collection.py)
+
+# config paths
 TIMING_PREDICTOR_PATH = "data/saved_models/timing_predictor.joblib"
 POWER_PREDICTOR_PATH = "data/saved_models/power_predictor.joblib"
 
-# Dataset (CIFAR-10) params
+# test dataset (CIFAR-10) params
 INPUT_CHANNELS = 3
 INPUT_SIZE = 32
 NUM_CLASSES = 10 # CIFAR-10 has 10 classes
 
-# Minimal Training Hyperparameters
+# minimal Training Hyperparameters for demo
 BATCH_SIZE = 64
 LEARNING_RATE = 0.001
-NUM_EPOCHS = 1 # <-- KEEPING THIS AT 1 FOR A MINIMAL TEST
+NUM_EPOCHS = 1 # ninimal epochs for demo
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-# --- Helper Functions ---
-
+# --- helper functions ---
 def load_data():
     """Loads CIFAR-10 dataset."""
     print(f"Loading CIFAR-10 dataset (to ./data)...")
@@ -86,7 +78,7 @@ def load_hardware_predictors(timing_path, power_path):
 def train_model(model, train_loader, criterion, optimizer, num_epochs=1):
     """Minimal training loop."""
     print(f"Starting minimal training for {num_epochs} epoch(s) on {DEVICE}...")
-    model.train() # Set model to training mode
+    model.train() # set model to training mode
     for epoch in range(num_epochs):
         running_loss = 0.0
         for i, (inputs, labels) in enumerate(train_loader, 0):
@@ -99,7 +91,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=1):
             optimizer.step()
             
             running_loss += loss.item()
-            if i % 100 == 99: # Print every 100 mini-batches
+            if i % 100 == 99: # print every 100 mini-batches
                 print(f'[Epoch {epoch + 1}, Batch {i + 1:5d}] loss: {running_loss / 100:.3f}')
                 running_loss = 0.0
     print("Finished minimal training.")
@@ -107,7 +99,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs=1):
 def evaluate_accuracy(model, test_loader):
     """Calculates accuracy on the test set."""
     print("Evaluating accuracy on test set...")
-    model.eval() # Set model to evaluation mode
+    model.eval() # set model to evaluation mode
     correct = 0
     total = 0
     with torch.no_grad():
@@ -128,7 +120,6 @@ def evaluate_speed(model, num_runs=100):
     model.eval()
     dummy_input = torch.randn(1, INPUT_CHANNELS, INPUT_SIZE, INPUT_SIZE).to(DEVICE)
     
-    # Warm-up run
     with torch.no_grad():
         _ = model(dummy_input)
         
@@ -142,21 +133,21 @@ def evaluate_speed(model, num_runs=100):
     print(f"Avg. Latency: {avg_latency:.4f} ms")
     return avg_latency
 
-# --- Main Execution ---
+# --- main execution ---
 
 def main():
     print("==============================================")
     print("--- HW-NAS Single Architecture Evaluator ---")
     print("==============================================")
     
-    # 1. Load Data and Hardware Predictors
+    # 1. load Data and Hardware Predictors
     train_loader, test_loader = load_data()
     timing_predictor, power_predictor = load_hardware_predictors(
         TIMING_PREDICTOR_PATH, 
         POWER_PREDICTOR_PATH
     )
     
-    # 2. Generate a random architecture
+    # 2. generate a random architecture
     print("\n--- 1. Generating Architecture ---")
     arch = get_random_architecture(
         input_channels=INPUT_CHANNELS, 
@@ -164,18 +155,18 @@ def main():
     )
     print(f"Generated Architecture:\n{arch}")
     
-    # 3. Build the PyTorch Model
+    # 3. build the PyTorch Model
     print("\n--- 2. Building PyTorch Model ---")
     model = build_pytorch_model(arch).to(DEVICE)
     print(model)
     
-    # 4. Train the Model (Minimally)
+    # 4. train the Model (Minimally)
     print("\n--- 3. Training Model ---")
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     train_model(model, train_loader, criterion, optimizer, num_epochs=NUM_EPOCHS)
     
-    # 5. Evaluate Metrics
+    # 5. evaluate Metrics
     print("\n--- 4. Evaluating Metrics ---")
     
     # Metric A: Accuracy
@@ -204,7 +195,7 @@ def main():
     else:
         print("Skipping power prediction (predictor not loaded).")
 
-    # 6. Final Summary
+    # 6. final Summary
     print("\n==============================================")
     print("--- EVALUATION SUMMARY ---")
     print("==============================================")

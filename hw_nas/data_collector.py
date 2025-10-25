@@ -1,14 +1,12 @@
 import subprocess
 import os
-
-# Import from other files in the hw_nas package
 from hw_nas.search_space import get_random_architecture
 from hw_nas.predictor import featurize
 from hw_nas.cpp_generator import generate_cpp_from_architecture
 from hw_nas.utils import read_vivado_results
 
 def _run_synthesis_script(config):
-    """Internal helper to run the synthesis script."""
+    """Helper to run the synthesis script."""
     print("starting HLS + Vivado synthesis...")
 
     # cleanup old synthesis files
@@ -22,8 +20,6 @@ def _run_synthesis_script(config):
     # start HLS + Vivado synthesis using shell script
     # catch errors if synthesis fails, and skip data point
     try:
-        # Run the script from the project root.
-        # The script itself will cd to its own dir.
         subprocess.run(["bash", config["VIVADO_SCRIPT"]], check=True) # print logs directly to console
     except subprocess.CalledProcessError as e:
         print(f"ERROR: Synthesis script failed with return code {e.returncode}!")
@@ -74,6 +70,6 @@ def collect_single_datapoint(iteration, total_iterations, config):
             print(" - Power read failed or was N/A.")
         return None, None, None
     
-    # Success! Return the collected data
+    # return valid data point
     return features, wns, power
 

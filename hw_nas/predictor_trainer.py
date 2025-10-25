@@ -61,7 +61,7 @@ def test_trained_predictors(timing_predictor, power_predictor):
     """Tests the predictors that were just trained in memory."""
     
     if timing_predictor is None and power_predictor is None:
-        if not (timing_predictor is not None or power_predictor is not None): # Logic from original file
+        if not (timing_predictor is not None or power_predictor is not None):
              print("\nNo predictors were successfully trained, skipping test.")
         return
 

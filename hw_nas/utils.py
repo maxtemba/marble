@@ -1,6 +1,6 @@
+# helper functions TODO: either add more functions here or move back
 import os
 
-# --- helper functions ---
 def read_vivado_results(results_file_path='./build/results.txt'):
     """reads WNS, WHS, and power from the Vivado generated results.txt file."""
     wns = None

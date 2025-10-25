@@ -1,19 +1,16 @@
 import joblib
 import os
 import numpy as np
-import sys  # <-- Add this
+import sys 
 
-# --- FIX: Add project root to Python path ---
-# This allows imports from the 'hw_nas' package
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(PROJECT_ROOT)
-# --- End of FIX ---
+
 
 from hw_nas.search_space import get_random_architecture
 from hw_nas.predictor import featurize
 
-# --- Configuration ---
-# Paths are relative to the project root
+# config paths 
 TIMING_PREDICTOR_PATH = "data/saved_models/timing_predictor.joblib"
 POWER_PREDICTOR_PATH = "data/saved_models/power_predictor.joblib"
 
@@ -26,7 +23,7 @@ def main():
     timing_predictor = None
     power_predictor = None
 
-    # Load timing predictor
+    # load timing predictor
     if os.path.exists(TIMING_PREDICTOR_PATH):
         try:
             timing_predictor = joblib.load(TIMING_PREDICTOR_PATH)
@@ -36,7 +33,7 @@ def main():
     else:
         print(f"WARN: Timing predictor file not found at {TIMING_PREDICTOR_PATH}")
 
-    # Load power predictor
+    # load power predictor
     if os.path.exists(POWER_PREDICTOR_PATH):
         try:
             power_predictor = joblib.load(POWER_PREDICTOR_PATH)

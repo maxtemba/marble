@@ -6,7 +6,7 @@ from .search_space import Architecture, get_random_architecture
 def featurize(arch: Architecture):
     total_depth = len(arch.blocks)
     
-    # --- Expanded features ---
+    # all features to extract
     total_convs = 0
     max_conv_out_channels = 0
     total_relu = 0
@@ -27,13 +27,13 @@ def featurize(arch: Architecture):
             total_convs += 1
             max_conv_out_channels = max(max_conv_out_channels, params.get('out_channels', 0))
             
-            # Featurize padding
+            # featurize padding
             if params.get('padding') == 'same':
                 total_padding_same += 1
             elif isinstance(params.get('padding'), int):
                 total_padding_num += params.get('padding')
                 
-            # Featurize stride
+            # featurize stride
             if params.get('stride') == 1:
                 total_stride_1 += 1
             elif params.get('stride') == 2:
@@ -43,7 +43,7 @@ def featurize(arch: Architecture):
             total_relu += 1
         elif op_type == 'max_pool':
             total_max_pool += 1
-            # All our max_pool ops have stride 2
+            # all max_pool ops have stride 2
             total_stride_2 += 1
         elif op_type == 'global_avg_pool':
             total_avg_pool += 1
@@ -52,7 +52,7 @@ def featurize(arch: Architecture):
             max_linear_out_features = max(max_linear_out_features, params.get('out_features', 0))
 
     
-    # Return a more descriptive feature vector
+    # return final featurized vector
     return np.array([
         total_depth, 
         total_convs, 
