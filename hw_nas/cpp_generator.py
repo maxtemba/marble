@@ -18,8 +18,12 @@ def generate_cpp_from_architecture(arch, output_file="generated_design.cpp"):
         # Write placeholder function declarations
         f.write("// Placeholder function declarations\n")
         f.write("void relu(float* data, int size);\n")
-        f.write("void add(float* a, float* b, float* result, int size);\n")
-        f.write("void conv(float* input, float* output, int channels, int filter_size);\n\n")
+        # 'add' declaration removed
+        f.write("void conv(float* input, float* output, int channels, int filter_size);\n")
+        f.write("void max_pool(float* input, float* output, int size, int kernel_size);\n")
+        f.write("void avg_pool(float* input, float* output, int size);\n")
+        f.write("void linear(float* input, float* output, int in_features, int out_features);\n\n")
+
         
         # Write top function with HLS interface
         f.write("void top_function(float* input, float* output, int size) {\n")
@@ -35,18 +39,31 @@ def generate_cpp_from_architecture(arch, output_file="generated_design.cpp"):
             op_type = block.op_type
             params = block.params
             
-            if 'conv' in op_type:
-                # Extract filter size from op_type (e.g., '3x3_conv' -> 3)
-                filter_size = int(op_type.split('x')[0]) if 'x' in op_type else 3
-                filters = params.get('filter', 64)
-                f.write(f"    // Block {i}: {op_type} with {filters} filters\n")
+            if op_type == 'conv':
+                # Read params from the block
+                filter_size = params.get('kernel_size', 3)
+                filters = params.get('out_channels', 64)
+                f.write(f"    // Block {i}: {op_type} with {filters} filters, {filter_size}x{filter_size}\n")
                 f.write(f"    conv(input, output, {filters}, {filter_size});\n")
             elif op_type == 'relu':
                 f.write(f"    // Block {i}: {op_type}\n")
                 f.write(f"    relu(output, size);\n")
-            elif op_type == 'add':
+            # 'add' block removed
+            elif op_type == 'max_pool':
+                kernel_size = params.get('kernel_size', 2)
+                f.write(f"    // Block {i}: {op_type} with {kernel_size}x{kernel_size} kernel\n")
+                f.write(f"    max_pool(output, output, size, {kernel_size});\n")
+            elif op_type == 'global_avg_pool':
                 f.write(f"    // Block {i}: {op_type}\n")
-                f.write(f"    add(input, output, output, size);\n")
+                f.write(f"    avg_pool(output, output, size);\n")
+            elif op_type == 'linear':
+                in_features = params.get('in_features', 512) # For placeholder, not really used
+                out_features = params.get('out_features', 512)
+                f.write(f"    // Block {i}: {op_type} with {out_features} out_features\n")
+                f.write(f"    linear(output, output, {in_features}, {out_features});\n")
+            elif op_type == 'flatten':
+                f.write(f"    // Block {i}: {op_type} (no-op in C++ placeholder)\n")
+                pass # Flatten is a data reshape, no C++ op needed for placeholder
         
         f.write("}\n")
     

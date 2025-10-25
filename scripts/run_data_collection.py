@@ -19,7 +19,7 @@ from hw_nas.predictor_trainer import train_predictors, test_trained_predictors
 
 # --- config ---
 # All paths are now relative to the project root
-NUM_DATAPOINTS_TO_GATHER = 1 # maybe 100? for demo, keep it small
+NUM_DATAPOINTS_TO_GATHER = 100 # maybe 100? for demo, keep it small
 VIVADO_SCRIPT = "hls_vivado/run_synthesis.sh" # Vivado setup script
 TIMING_PREDICTOR_PATH = "data/saved_models/timing_predictor.joblib" # saved time predictor path
 POWER_PREDICTOR_PATH = "data/saved_models/power_predictor.joblib" # saved power predictor path
